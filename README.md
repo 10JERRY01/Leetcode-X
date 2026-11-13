@@ -7,7 +7,7 @@ A curated repository of essential LeetCode solutions, progressive hints, and int
 | # | Problem | Folder | Core Pattern | Status |
 |:---:|:---|:---:|:---|:---:|
 | 1 | **Two Sum** (LC 1) | [Two Sum](./Two%20Sum/) | Hash Map / Complement Lookup | Completed |
-| 2 | **Valid Parentheses** (LC 20) | — | Stack / Matching Pair Verification | Upcoming |
+| 2 | **Valid Parentheses** (LC 20) | [Valid Parentheses](./Valid%20Parentheses/) | Stack / Matching Pair Verification | Completed |
 | 3 | **Merge Two Sorted Lists** (LC 21) | — | Linked List / Two-Pointer Splice | Upcoming |
 | 4 | **Best Time to Buy and Sell Stock** (LC 121) | — | Greedy / One-Pass Min Tracking | Upcoming |
 | 5 | **Valid Palindrome** (LC 125) | — | Two Pointers (Inward Scan) | Upcoming |
