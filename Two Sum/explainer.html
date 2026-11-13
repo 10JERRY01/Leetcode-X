@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode 1: Two Sum - Interactive Visual Explainer</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .transition-all-300 {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-subtle 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-3 sm:p-5 font-sans">
+  <div class="max-w-3xl mx-auto bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-lg space-y-5">
+    
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">Easy</span>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">LeetCode 1: Two Sum</h1>
+        </div>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1">One-Pass Hash Map Algorithm Visual Walkthrough</p>
+      </div>
+
+      <!-- Test Case Selector -->
+      <div class="flex items-center gap-2">
+        <label for="caseSelect" class="text-xs font-medium text-[var(--muted-foreground)]">Test Case:</label>
+        <select id="caseSelect" class="bg-[var(--background)] text-xs font-medium border border-[var(--border)] rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="0">nums = [2, 7, 11, 15], target = 9</option>
+          <option value="1">nums = [3, 2, 4], target = 6</option>
+          <option value="2">nums = [3, 3], target = 6 (Duplicates)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Math Formula / Target Banner -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-col items-center justify-center">
+        <span class="text-xs text-[var(--muted-foreground)] font-medium">Target</span>
+        <span id="targetDisplay" class="text-xl font-black text-blue-500">9</span>
+      </div>
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-col items-center justify-center">
+        <span class="text-xs text-[var(--muted-foreground)] font-medium">Formula</span>
+        <span class="text-xs sm:text-sm font-mono font-semibold">complement = target - nums[i]</span>
+      </div>
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-col items-center justify-center">
+        <span class="text-xs text-[var(--muted-foreground)] font-medium">Current Equation</span>
+        <span id="equationDisplay" class="text-xs sm:text-sm font-mono font-semibold text-amber-500">Waiting to start...</span>
+      </div>
+    </div>
+
+    <!-- Visual Array Area -->
+    <div class="space-y-2">
+      <div class="flex justify-between items-center text-xs text-[var(--muted-foreground)] font-semibold uppercase tracking-wider">
+        <span>Array: <code class="font-mono">nums</code></span>
+        <span id="pointerStatus">Index i: -</span>
+      </div>
+      <div id="arrayContainer" class="flex gap-2 sm:gap-3 overflow-x-auto pb-2 pt-1 items-center justify-center sm:justify-start min-h-[90px]">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Hash Map Visualizer -->
+    <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6"></path>
+          </svg>
+          <span class="text-xs font-bold uppercase tracking-wider">Hash Map <span class="text-[var(--muted-foreground)] font-normal font-mono">(seen: value &rarr; index)</span></span>
+        </div>
+        <span id="mapSizeBadge" class="text-xs px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] font-mono">0 items</span>
+      </div>
+      
+      <div id="mapContainer" class="flex flex-wrap gap-2 min-h-[44px] items-center p-2 rounded-lg bg-[var(--card)] border border-dashed border-[var(--border)]">
+        <span id="emptyMapText" class="text-xs text-[var(--muted-foreground)] italic px-2">Map is empty. No elements processed yet.</span>
+      </div>
+    </div>
+
+    <!-- Narrator / Video Caption Subtitle Bar -->
+    <div class="relative bg-blue-500/10 border border-blue-500/30 rounded-xl p-3.5 flex items-start gap-3">
+      <div class="p-1.5 rounded-lg bg-blue-500/20 text-blue-500 shrink-0 mt-0.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-blue-500">Narrator & Concept Insight</div>
+        <div id="narratorText" class="text-xs sm:text-sm font-medium text-[var(--foreground)] mt-0.5 leading-relaxed">
+          Click "Play" or "Next Step" to start the animation and see how Hash Map achieves O(n) lookup.
+        </div>
+      </div>
+    </div>
+
+    <!-- Video-Style Playback Controls -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[var(--border)]">
+      <!-- Buttons -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="btnReset" class="p-2 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-[var(--background)] hover:bg-[var(--border)] border border-[var(--border)] transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span class="hidden sm:inline">Reset</span>
+        </button>
+        <button id="btnPrev" class="p-2 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-[var(--background)] hover:bg-[var(--border)] border border-[var(--border)] transition-colors disabled:opacity-40">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button id="btnPlay" class="px-3.5 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center gap-1.5">
+          <svg id="playIcon" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span id="playText">Play</span>
+        </button>
+        <button id="btnNext" class="p-2 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-[var(--background)] hover:bg-[var(--border)] border border-[var(--border)] transition-colors disabled:opacity-40">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+
+      <!-- Step Counter & Speed -->
+      <div class="flex items-center gap-3">
+        <div class="text-xs font-mono text-[var(--muted-foreground)]">
+          Step <span id="currentStepNum" class="font-bold text-[var(--foreground)]">0</span> / <span id="totalStepsNum">0</span>
+        </div>
+        <div class="flex items-center gap-1 bg-[var(--background)] border border-[var(--border)] rounded-lg p-1 text-xs">
+          <button class="speed-btn px-2 py-0.5 rounded font-mono font-medium hover:bg-[var(--card)]" data-speed="2000">0.5x</button>
+          <button class="speed-btn px-2 py-0.5 rounded font-mono font-bold bg-blue-600 text-white" data-speed="1200">1x</button>
+          <button class="speed-btn px-2 py-0.5 rounded font-mono font-medium hover:bg-[var(--card)]" data-speed="600">2x</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const testCases = [
+      {
+        nums: [2, 7, 11, 15],
+        target: 9,
+        steps: [
+          {
+            type: "inspect",
+            i: 0,
+            val: 2,
+            target: 9,
+            complement: 7,
+            map: {},
+            found: false,
+            narrator: "Looking at index 0 (value: 2). We calculate complement: 9 - 2 = 7. Is 7 in our hash map? No! So store 2 at index 0 for future lookups."
+          },
+          {
+            type: "insert",
+            i: 0,
+            val: 2,
+            target: 9,
+            complement: 7,
+            map: { 2: 0 },
+            found: false,
+            narrator: "Added {2: 0} to the hash map. Move pointer i to the next index."
+          },
+          {
+            type: "inspect",
+            i: 1,
+            val: 7,
+            target: 9,
+            complement: 2,
+            map: { 2: 0 },
+            found: true,
+            matchedIndex: 0,
+            result: [0, 1],
+            narrator: "BINGO! At index 1 (value: 7), complement is 9 - 7 = 2. We check our hash map: 2 was already stored at index 0! Return [0, 1]!"
+          }
+        ]
+      },
+      {
+        nums: [3, 2, 4],
+        target: 6,
+        steps: [
+          {
+            type: "inspect",
+            i: 0,
+            val: 3,
+            target: 6,
+            complement: 3,
+            map: {},
+            found: false,
+            narrator: "At index 0 (value: 3). Complement is 6 - 3 = 3. Notice map is empty! We cannot pair with ourselves. Save {3: 0}."
+          },
+          {
+            type: "insert",
+            i: 0,
+            val: 3,
+            target: 6,
+            complement: 3,
+            map: { 3: 0 },
+            found: false,
+            narrator: "Stored {3: 0} in map. Proceed to index 1."
+          },
+          {
+            type: "inspect",
+            i: 1,
+            val: 2,
+            target: 6,
+            complement: 4,
+            map: { 3: 0 },
+            found: false,
+            narrator: "At index 1 (value: 2). Complement is 6 - 2 = 4. Is 4 in map? No, map only has {3: 0}. Insert {2: 1}."
+          },
+          {
+            type: "insert",
+            i: 1,
+            val: 2,
+            target: 6,
+            complement: 4,
+            map: { 3: 0, 2: 1 },
+            found: false,
+            narrator: "Map now has {3: 0, 2: 1}. Moving to index 2."
+          },
+          {
+            type: "inspect",
+            i: 2,
+            val: 4,
+            target: 6,
+            complement: 2,
+            map: { 3: 0, 2: 1 },
+            found: true,
+            matchedIndex: 1,
+            result: [1, 2],
+            narrator: "MATCH FOUND! At index 2 (value: 4), complement is 6 - 4 = 2. Map has 2 at index 1! Solution indices: [1, 2]."
+          }
+        ]
+      },
+      {
+        nums: [3, 3],
+        target: 6,
+        steps: [
+          {
+            type: "inspect",
+            i: 0,
+            val: 3,
+            target: 6,
+            complement: 3,
+            map: {},
+            found: false,
+            narrator: "First duplicate: index 0 (value: 3). Complement is 3. Map is empty, so we safely store {3: 0} without collision."
+          },
+          {
+            type: "insert",
+            i: 0,
+            val: 3,
+            target: 6,
+            complement: 3,
+            map: { 3: 0 },
+            found: false,
+            narrator: "Stored {3: 0} in map. Advance to second duplicate at index 1."
+          },
+          {
+            type: "inspect",
+            i: 1,
+            val: 3,
+            target: 6,
+            complement: 3,
+            map: { 3: 0 },
+            found: true,
+            matchedIndex: 0,
+            result: [0, 1],
+            narrator: "SOLVED! At index 1 (value: 3), complement 3 exists in the map from index 0! Solved cleanly in one pass: [0, 1]."
+          }
+        ]
+      }
+    ];
+
+    let currentCaseIdx = 0;
+    let stepIndex = -1; // -1 means initial unstarted state
+    let isPlaying = false;
+    let timer = null;
+    let playSpeed = 1200;
+
+    // Elements
+    const caseSelect = document.getElementById('caseSelect');
+    const targetDisplay = document.getElementById('targetDisplay');
+    const equationDisplay = document.getElementById('equationDisplay');
+    const arrayContainer = document.getElementById('arrayContainer');
+    const pointerStatus = document.getElementById('pointerStatus');
+    const mapContainer = document.getElementById('mapContainer');
+    const mapSizeBadge = document.getElementById('mapSizeBadge');
+    const narratorText = document.getElementById('narratorText');
+    const currentStepNum = document.getElementById('currentStepNum');
+    const totalStepsNum = document.getElementById('totalStepsNum');
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const speedButtons = document.querySelectorAll('.speed-btn');
+
+    function loadCase(idx) {
+      stopAutoPlay();
+      currentCaseIdx = idx;
+      stepIndex = -1;
+      const tc = testCases[currentCaseIdx];
+      targetDisplay.textContent = tc.target;
+      equationDisplay.textContent = `target = ${tc.target}`;
+      totalStepsNum.textContent = tc.steps.length;
+      renderState();
+    }
+
+    function renderState() {
+      const tc = testCases[currentCaseIdx];
+      const step = stepIndex >= 0 ? tc.steps[stepIndex] : null;
+
+      currentStepNum.textContent = Math.max(0, stepIndex + 1);
+      btnPrev.disabled = stepIndex <= -1;
+      btnNext.disabled = stepIndex >= tc.steps.length - 1;
+
+      // Render Array
+      arrayContainer.innerHTML = '';
+      tc.nums.forEach((num, idx) => {
+        const itemBox = document.createElement('div');
+        itemBox.className = 'flex flex-col items-center shrink-0 transition-all-300';
+
+        let borderColor = 'border-[var(--border)]';
+        let bgColor = 'bg-[var(--card)]';
+        let textColor = 'text-[var(--foreground)]';
+        let extraClass = '';
+        let badge = '';
+
+        if (step) {
+          if (step.found && (idx === step.i || idx === step.matchedIndex)) {
+            borderColor = 'border-emerald-500';
+            bgColor = 'bg-emerald-500/20';
+            textColor = 'text-emerald-500 font-bold';
+            extraClass = 'ring-2 ring-emerald-500 ring-offset-2 animate-pulse-subtle';
+            badge = idx === step.i ? 'Found!' : 'Match!';
+          } else if (idx === step.i) {
+            borderColor = 'border-blue-500';
+            bgColor = 'bg-blue-500/20';
+            textColor = 'text-blue-500 font-bold';
+            extraClass = 'ring-2 ring-blue-500';
+            badge = 'nums[i]';
+          } else if (idx < step.i) {
+            borderColor = 'border-[var(--border)]';
+            bgColor = 'bg-[var(--background)]';
+            textColor = 'text-[var(--muted-foreground)]';
+          }
+        }
+
+        itemBox.innerHTML = `
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border ${borderColor} ${bgColor} flex flex-col items-center justify-center font-mono font-bold text-base sm:text-lg shadow-sm ${extraClass} transition-all-300">
+            <span class="${textColor}">${num}</span>
+            <span class="text-[10px] font-normal text-[var(--muted-foreground)]">i=${idx}</span>
+          </div>
+          <div class="h-4 text-[10px] font-semibold text-blue-500 mt-1">${badge}</div>
+        `;
+        arrayContainer.appendChild(itemBox);
+      });
+
+      // Pointer Status & Equation
+      if (!step) {
+        pointerStatus.textContent = 'Index i: Ready';
+        equationDisplay.textContent = `target = ${tc.target}`;
+        narratorText.textContent = 'Click "Play" or "Next Step" to start the algorithmic walkthrough!';
+      } else {
+        pointerStatus.textContent = `Index i = ${step.i} (val = ${step.val})`;
+        if (step.type === 'inspect') {
+          equationDisplay.innerHTML = `${tc.target} - <span class="text-blue-500 font-bold">${step.val}</span> = <span class="text-amber-500 font-bold">${step.complement}</span>`;
+        } else {
+          equationDisplay.innerHTML = `Stored <span class="text-purple-500 font-bold">${step.val} &rarr; idx ${step.i}</span> in map`;
+        }
+        narratorText.textContent = step.narrator;
+      }
+
+      // Render Hash Map
+      mapContainer.innerHTML = '';
+      const mapObj = step ? step.map : {};
+      const mapKeys = Object.keys(mapObj);
+      mapSizeBadge.textContent = `${mapKeys.length} items`;
+
+      if (mapKeys.length === 0) {
+        mapContainer.innerHTML = '<span class="text-xs text-[var(--muted-foreground)] italic px-2">Map is empty. No elements stored yet.</span>';
+      } else {
+        mapKeys.forEach(k => {
+          const isMatched = step && step.found && Number(k) === step.nums?.[step.matchedIndex] || (step && step.found && Number(k) === (step.target - step.val));
+          const badgeClass = isMatched 
+            ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500 ring-2 ring-emerald-500 font-bold' 
+            : 'bg-[var(--background)] text-[var(--foreground)] border-[var(--border)]';
+          
+          const pill = document.createElement('div');
+          pill.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono shadow-sm transition-all-300 ${badgeClass}`;
+          pill.innerHTML = `
+            <span class="font-bold">${k}</span>
+            <span class="text-[var(--muted-foreground)]">&rarr;</span>
+            <span class="text-blue-500 font-bold">idx ${mapObj[k]}</span>
+            ${isMatched ? '<span class="ml-1 text-[10px] uppercase text-emerald-500 font-black">MATCH</span>' : ''}
+          `;
+          mapContainer.appendChild(pill);
+        });
+      }
+    }
+
+    function stepForward() {
+      const tc = testCases[currentCaseIdx];
+      if (stepIndex < tc.steps.length - 1) {
+        stepIndex++;
+        renderState();
+        if (stepIndex === tc.steps.length - 1) {
+          stopAutoPlay();
+        }
+      } else {
+        stopAutoPlay();
+      }
+    }
+
+    function stepBackward() {
+      if (stepIndex > 0) {
+        stepIndex--;
+        renderState();
+      } else if (stepIndex === 0) {
+        stepIndex = -1;
+        renderState();
+      }
+      stopAutoPlay();
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function startAutoPlay() {
+      const tc = testCases[currentCaseIdx];
+      if (stepIndex >= tc.steps.length - 1) {
+        stepIndex = -1;
+        renderState();
+      }
+      isPlaying = true;
+      playText.textContent = "Pause";
+      playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      timer = setInterval(() => {
+        stepForward();
+      }, playSpeed);
+    }
+
+    function stopAutoPlay() {
+      isPlaying = false;
+      playText.textContent = "Play";
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    // Event listeners
+    caseSelect.addEventListener('change', (e) => loadCase(Number(e.target.value)));
+    btnNext.addEventListener('click', () => { stopAutoPlay(); stepForward(); });
+    btnPrev.addEventListener('click', () => { stopAutoPlay(); stepBackward(); });
+    btnReset.addEventListener('click', () => { stopAutoPlay(); stepIndex = -1; renderState(); });
+    btnPlay.addEventListener('click', togglePlay);
+
+    speedButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        speedButtons.forEach(b => {
+          b.className = 'speed-btn px-2 py-0.5 rounded font-mono font-medium hover:bg-[var(--card)]';
+        });
+        btn.className = 'speed-btn px-2 py-0.5 rounded font-mono font-bold bg-blue-600 text-white';
+        playSpeed = Number(btn.getAttribute('data-speed'));
+        if (isPlaying) {
+          stopAutoPlay();
+          startAutoPlay();
+        }
+      });
+    });
+
+    // Initialize
+    loadCase(0);
+  </script>
+</body>
+</html>
