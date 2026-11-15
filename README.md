@@ -8,7 +8,7 @@ A curated repository of essential LeetCode solutions, progressive hints, and int
 |:---:|:---|:---:|:---|:---:|
 | 1 | **Two Sum** (LC 1) | [Two Sum](./Two%20Sum/) | Hash Map / Complement Lookup | Completed |
 | 2 | **Valid Parentheses** (LC 20) | [Valid Parentheses](./Valid%20Parentheses/) | Stack / Matching Pair Verification | Completed |
-| 3 | **Merge Two Sorted Lists** (LC 21) | — | Linked List / Two-Pointer Splice | Upcoming |
+| 3 | **Merge Two Sorted Lists** (LC 21) | [Merge Two Sorted Lists](./Merge%20Two%20Sorted%20Lists/) | Linked List / Two-Pointer Splice | Completed |
 | 4 | **Best Time to Buy and Sell Stock** (LC 121) | — | Greedy / One-Pass Min Tracking | Upcoming |
 | 5 | **Valid Palindrome** (LC 125) | — | Two Pointers (Inward Scan) | Upcoming |
 | 6 | **Invert Binary Tree** (LC 226) | — | Binary Tree / DFS Recursion | Upcoming |

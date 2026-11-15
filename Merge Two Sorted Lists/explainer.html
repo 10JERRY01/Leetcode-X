@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetCode 21: Merge Two Sorted Lists - Interactive Visual Explainer</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .transition-all-300 {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes pulse-node {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .animate-pulse-node {
+      animation: pulse-node 1.2s infinite;
+    }
+  </style>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-3 sm:p-5 font-sans">
+  <div class="max-w-3xl mx-auto bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-2xl p-5 shadow-lg space-y-5">
+    
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">Easy</span>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">LeetCode 21: Merge Two Sorted Lists</h1>
+        </div>
+        <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1">Two-Pointer In-Place Splice & Dummy Sentinel Pattern</p>
+      </div>
+
+      <!-- Test Case Selector -->
+      <div class="flex items-center gap-2">
+        <label for="caseSelect" class="text-xs font-medium text-[var(--muted-foreground)]">Test Case:</label>
+        <select id="caseSelect" class="bg-[var(--background)] text-xs font-medium border border-[var(--border)] rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="0">list1 = [1, 2, 4], list2 = [1, 3, 4]</option>
+          <option value="1">list1 = [], list2 = [0] (One Empty List)</option>
+          <option value="2">list1 = [5], list2 = [1, 2, 3] (Asymmetric Lengths)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Comparison Status Banner -->
+    <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Comparison State</span>
+          <div id="comparisonDetail" class="text-xs sm:text-sm font-mono font-bold text-[var(--foreground)] mt-0.5">Ready to compare heads...</div>
+        </div>
+      </div>
+      <div id="decisionBadge" class="text-xs font-mono px-3 py-1 rounded-full bg-[var(--card)] border border-[var(--border)] font-bold text-[var(--muted-foreground)]">
+        Idle
+      </div>
+    </div>
+
+    <!-- Source Lists Visualizer -->
+    <div class="space-y-3">
+      
+      <!-- List 1 Row -->
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-blue-500 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> List 1
+          </span>
+          <span id="p1Status" class="text-[11px] font-mono text-[var(--muted-foreground)]">p1: Head</span>
+        </div>
+        <div id="list1Container" class="flex items-center gap-2 overflow-x-auto min-h-[50px] pb-1">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- List 2 Row -->
+      <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-purple-500 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-purple-500"></span> List 2
+          </span>
+          <span id="p2Status" class="text-[11px] font-mono text-[var(--muted-foreground)]">p2: Head</span>
+        </div>
+        <div id="list2Container" class="flex items-center gap-2 overflow-x-auto min-h-[50px] pb-1">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Merged Result Chain -->
+    <div class="bg-[var(--background)] border border-[var(--border)] rounded-xl p-3.5 space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Merged Result Chain (current.next)
+        </span>
+        <span id="mergedLengthBadge" class="text-[11px] font-mono text-[var(--muted-foreground)]">dummy only</span>
+      </div>
+      <div id="mergedContainer" class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto min-h-[60px] p-2 rounded-lg bg-[var(--card)] border border-dashed border-[var(--border)]">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Narrator / Video Caption Bar -->
+    <div id="narratorBox" class="relative bg-blue-500/10 border border-blue-500/30 rounded-xl p-3.5 flex items-start gap-3 transition-all-300">
+      <div id="narratorIcon" class="p-1.5 rounded-lg bg-blue-500/20 text-blue-500 shrink-0 mt-0.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div id="narratorTitle" class="text-[11px] font-bold uppercase tracking-wider text-blue-500">Narrator & Algorithm Insight</div>
+        <div id="narratorText" class="text-xs sm:text-sm font-medium text-[var(--foreground)] mt-0.5 leading-relaxed">
+          Click "Play" or "Next Step" to observe how the two-pointer splice weaves two sorted lists into one in O(n + m) time!
+        </div>
+      </div>
+    </div>
+
+    <!-- Playback Controls -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[var(--border)]">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="btnReset" class="p-2 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-[var(--background)] hover:bg-[var(--border)] border border-[var(--border)] transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span class="hidden sm:inline">Reset</span>
+        </button>
+        <button id="btnPrev" class="p-2 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-[var(--background)] hover:bg-[var(--border)] border border-[var(--border)] transition-colors disabled:opacity-40">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button id="btnPlay" class="px-3.5 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm flex items-center gap-1.5">
+          <svg id="playIcon" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span id="playText">Play</span>
+        </button>
+        <button id="btnNext" class="p-2 sm:px-3 sm:py-2 text-xs font-semibold rounded-lg bg-[var(--background)] hover:bg-[var(--border)] border border-[var(--border)] transition-colors disabled:opacity-40">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+
+      <!-- Step Counter & Speed -->
+      <div class="flex items-center gap-3">
+        <div class="text-xs font-mono text-[var(--muted-foreground)]">
+          Step <span id="currentStepNum" class="font-bold text-[var(--foreground)]">0</span> / <span id="totalStepsNum">0</span>
+        </div>
+        <div class="flex items-center gap-1 bg-[var(--background)] border border-[var(--border)] rounded-lg p-1 text-xs">
+          <button class="speed-btn px-2 py-0.5 rounded font-mono font-medium hover:bg-[var(--card)]" data-speed="2200">0.5x</button>
+          <button class="speed-btn px-2 py-0.5 rounded font-mono font-bold bg-blue-600 text-white" data-speed="1300">1x</button>
+          <button class="speed-btn px-2 py-0.5 rounded font-mono font-medium hover:bg-[var(--card)]" data-speed="650">2x</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const testCases = [
+      {
+        list1: [1, 2, 4],
+        list2: [1, 3, 4],
+        steps: [
+          {
+            p1: 0, p2: 0,
+            comp: "list1 (1) == list2 (1)",
+            pick: "list1",
+            val: 1,
+            merged: [1],
+            narrator: "Both nodes equal 1. By convention (list1.val <= list2.val), pick list1 (val: 1). Attach to current.next and advance list1 pointer."
+          },
+          {
+            p1: 1, p2: 0,
+            comp: "list1 (2) > list2 (1)",
+            pick: "list2",
+            val: 1,
+            merged: [1, 1],
+            narrator: "Compare list1 (2) vs list2 (1). Since 1 <= 2, pick list2 (val: 1). Attach to current.next and advance list2 pointer."
+          },
+          {
+            p1: 1, p2: 1,
+            comp: "list1 (2) < list2 (3)",
+            pick: "list1",
+            val: 2,
+            merged: [1, 1, 2],
+            narrator: "Compare list1 (2) vs list2 (3). Since 2 <= 3, pick list1 (val: 2). Attach to current.next and advance list1."
+          },
+          {
+            p1: 2, p2: 1,
+            comp: "list1 (4) > list2 (3)",
+            pick: "list2",
+            val: 3,
+            merged: [1, 1, 2, 3],
+            narrator: "Compare list1 (4) vs list2 (3). Since 3 <= 4, pick list2 (val: 3). Attach to current.next and advance list2."
+          },
+          {
+            p1: 2, p2: 2,
+            comp: "list1 (4) == list2 (4)",
+            pick: "list1",
+            val: 4,
+            merged: [1, 1, 2, 3, 4],
+            narrator: "Compare list1 (4) vs list2 (4). Equal values: pick list1 (val: 4). Attach and advance list1."
+          },
+          {
+            p1: 3, p2: 2,
+            comp: "list1 is Null (Exhausted)",
+            pick: "splice list2",
+            val: 4,
+            merged: [1, 1, 2, 3, 4, 4],
+            narrator: "list1 is now exhausted (Null)! No more comparison loop needed. Splice all remaining nodes of list2 in one step (current.next = list2)!"
+          },
+          {
+            p1: 3, p2: 3,
+            comp: "Finished",
+            pick: "done",
+            val: null,
+            merged: [1, 1, 2, 3, 4, 4],
+            narrator: "Completed! Return dummy.next as the head of the sorted merged list: [1, 1, 2, 3, 4, 4]."
+          }
+        ]
+      },
+      {
+        list1: [],
+        list2: [0],
+        steps: [
+          {
+            p1: 0, p2: 0,
+            comp: "list1 is Null immediately",
+            pick: "splice list2",
+            val: 0,
+            merged: [0],
+            narrator: "list1 is empty from the start! Loop never enters; immediately execute current.next = list1 or list2. All of list2 ([0]) attached in O(1)."
+          },
+          {
+            p1: 0, p2: 1,
+            comp: "Finished",
+            pick: "done",
+            val: null,
+            merged: [0],
+            narrator: "Return dummy.next which points to [0]. Handled cleanly without extra conditions!"
+          }
+        ]
+      },
+      {
+        list1: [5],
+        list2: [1, 2, 3],
+        steps: [
+          {
+            p1: 0, p2: 0,
+            comp: "list1 (5) > list2 (1)",
+            pick: "list2",
+            val: 1,
+            merged: [1],
+            narrator: "Compare 5 vs 1. Pick list2 (val: 1). Advance list2 pointer."
+          },
+          {
+            p1: 0, p2: 1,
+            comp: "list1 (5) > list2 (2)",
+            pick: "list2",
+            val: 2,
+            merged: [1, 2],
+            narrator: "Compare 5 vs 2. Pick list2 (val: 2). Advance list2 pointer."
+          },
+          {
+            p1: 0, p2: 2,
+            comp: "list1 (5) > list2 (3)",
+            pick: "list2",
+            val: 3,
+            merged: [1, 2, 3],
+            narrator: "Compare 5 vs 3. Pick list2 (val: 3). Advance list2 pointer."
+          },
+          {
+            p1: 0, p2: 3,
+            comp: "list2 is Null",
+            pick: "splice list1",
+            val: 5,
+            merged: [1, 2, 3, 5],
+            narrator: "list2 is exhausted! Attach the entire rest of list1 in one pointer assignment: current.next = list1."
+          },
+          {
+            p1: 1, p2: 3,
+            comp: "Finished",
+            pick: "done",
+            val: null,
+            merged: [1, 2, 3, 5],
+            narrator: "Done! Final list: [1, 2, 3, 5]."
+          }
+        ]
+      }
+    ];
+
+    let currentCaseIdx = 0;
+    let stepIndex = -1;
+    let isPlaying = false;
+    let timer = null;
+    let playSpeed = 1300;
+
+    // DOM Elements
+    const caseSelect = document.getElementById('caseSelect');
+    const comparisonDetail = document.getElementById('comparisonDetail');
+    const decisionBadge = document.getElementById('decisionBadge');
+    const list1Container = document.getElementById('list1Container');
+    const list2Container = document.getElementById('list2Container');
+    const p1Status = document.getElementById('p1Status');
+    const p2Status = document.getElementById('p2Status');
+    const mergedContainer = document.getElementById('mergedContainer');
+    const mergedLengthBadge = document.getElementById('mergedLengthBadge');
+    const narratorBox = document.getElementById('narratorBox');
+    const narratorIcon = document.getElementById('narratorIcon');
+    const narratorTitle = document.getElementById('narratorTitle');
+    const narratorText = document.getElementById('narratorText');
+    const currentStepNum = document.getElementById('currentStepNum');
+    const totalStepsNum = document.getElementById('totalStepsNum');
+    const btnPlay = document.getElementById('btnPlay');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+    const speedButtons = document.querySelectorAll('.speed-btn');
+
+    function loadCase(idx) {
+      stopAutoPlay();
+      currentCaseIdx = idx;
+      stepIndex = -1;
+      const tc = testCases[currentCaseIdx];
+      totalStepsNum.textContent = tc.steps.length;
+      renderState();
+    }
+
+    function renderList(container, items, activeIdx, labelPrefix, colorClass) {
+      container.innerHTML = '';
+      if (items.length === 0) {
+        container.innerHTML = '<span class="text-xs text-[var(--muted-foreground)] italic py-1 px-2">Empty List (Null)</span>';
+        return;
+      }
+      items.forEach((val, idx) => {
+        const isCurrent = (stepIndex >= 0 && idx === activeIdx);
+        const isProcessed = (stepIndex >= 0 && idx < activeIdx);
+        
+        const node = document.createElement('div');
+        node.className = 'flex items-center shrink-0';
+
+        let border = 'border-[var(--border)]';
+        let bg = 'bg-[var(--card)]';
+        let text = 'text-[var(--foreground)]';
+        let extra = '';
+
+        if (isCurrent) {
+          border = `${colorClass.border} ring-2 ${colorClass.ring}`;
+          bg = colorClass.bg;
+          text = `${colorClass.text} font-bold`;
+          extra = 'animate-pulse-node';
+        } else if (isProcessed) {
+          border = 'border-[var(--border)] opacity-40';
+          bg = 'bg-[var(--background)]';
+          text = 'text-[var(--muted-foreground)]';
+        }
+
+        node.innerHTML = `
+          <div class="px-3 py-1.5 rounded-lg border ${border} ${bg} flex flex-col items-center justify-center font-mono text-xs shadow-sm ${extra} transition-all-300">
+            <span class="${text}">${val}</span>
+            <span class="text-[9px] text-[var(--muted-foreground)]">${isCurrent ? 'PTR' : ''}</span>
+          </div>
+          ${idx < items.length - 1 ? '<span class="text-xs text-[var(--muted-foreground)] px-1">&rarr;</span>' : '<span class="text-[10px] text-[var(--muted-foreground)] px-1">&rarr; null</span>'}
+        `;
+        container.appendChild(node);
+      });
+    }
+
+    function renderMerged(mergedItems, isDone) {
+      mergedContainer.innerHTML = '';
+      
+      // Dummy Node
+      const dummyEl = document.createElement('div');
+      dummyEl.className = 'flex items-center shrink-0';
+      dummyEl.innerHTML = `
+        <div class="px-2.5 py-1.5 rounded-lg border border-dashed border-[var(--border)] bg-[var(--background)] text-xs font-mono text-[var(--muted-foreground)] flex flex-col items-center">
+          <span>dummy</span>
+          <span class="text-[9px] text-[var(--muted-foreground)]">-1</span>
+        </div>
+        <span class="text-xs text-[var(--muted-foreground)] px-1">&rarr;</span>
+      `;
+      mergedContainer.appendChild(dummyEl);
+
+      if (mergedItems.length === 0) {
+        const emptyHint = document.createElement('span');
+        emptyHint.className = 'text-xs text-[var(--muted-foreground)] italic px-2';
+        emptyHint.textContent = 'None yet (current points to dummy)';
+        mergedContainer.appendChild(emptyHint);
+        mergedLengthBadge.textContent = 'dummy only';
+        return;
+      }
+
+      mergedLengthBadge.textContent = `${mergedItems.length} nodes spliced`;
+
+      mergedItems.forEach((val, idx) => {
+        const isTail = idx === mergedItems.length - 1;
+        const node = document.createElement('div');
+        node.className = 'flex items-center shrink-0';
+
+        const nodeStyle = isTail && !isDone
+          ? 'border-emerald-500 bg-emerald-500/20 text-emerald-500 font-bold ring-2 ring-emerald-500/40 animate-pulse-node'
+          : 'border-emerald-500/50 bg-emerald-500/10 text-[var(--foreground)] font-semibold';
+
+        node.innerHTML = `
+          <div class="px-3 py-1.5 rounded-lg border ${nodeStyle} flex flex-col items-center justify-center font-mono text-xs shadow-sm transition-all-300">
+            <span>${val}</span>
+            <span class="text-[9px] text-[var(--muted-foreground)]">${isTail ? 'current' : ''}</span>
+          </div>
+          ${idx < mergedItems.length - 1 ? '<span class="text-xs text-emerald-500/70 px-1">&rarr;</span>' : '<span class="text-xs text-emerald-500 px-1">&rarr; null</span>'}
+        `;
+        mergedContainer.appendChild(node);
+      });
+    }
+
+    function renderState() {
+      const tc = testCases[currentCaseIdx];
+      const step = stepIndex >= 0 ? tc.steps[stepIndex] : null;
+
+      currentStepNum.textContent = Math.max(0, stepIndex + 1);
+      btnPrev.disabled = stepIndex <= -1;
+      btnNext.disabled = stepIndex >= tc.steps.length - 1;
+
+      const p1Idx = step ? step.p1 : 0;
+      const p2Idx = step ? step.p2 : 0;
+
+      renderList(list1Container, tc.list1, p1Idx, 'list1', {
+        border: 'border-blue-500',
+        ring: 'ring-blue-500/50',
+        bg: 'bg-blue-500/20',
+        text: 'text-blue-500'
+      });
+
+      renderList(list2Container, tc.list2, p2Idx, 'list2', {
+        border: 'border-purple-500',
+        ring: 'ring-purple-500/50',
+        bg: 'bg-purple-500/20',
+        text: 'text-purple-500'
+      });
+
+      p1Status.textContent = tc.list1.length === 0 ? 'list1 is null' : (p1Idx >= tc.list1.length ? 'list1: null (exhausted)' : `p1 at index ${p1Idx}`);
+      p2Status.textContent = tc.list2.length === 0 ? 'list2 is null' : (p2Idx >= tc.list2.length ? 'list2: null (exhausted)' : `p2 at index ${p2Idx}`);
+
+      const mergedList = step ? step.merged : [];
+      const isDone = step && step.pick === 'done';
+      renderMerged(mergedList, isDone);
+
+      if (!step) {
+        comparisonDetail.textContent = 'Ready to compare list heads...';
+        decisionBadge.textContent = 'IDLE';
+        decisionBadge.className = 'text-xs font-mono px-3 py-1 rounded-full bg-[var(--card)] border border-[var(--border)] font-bold text-[var(--muted-foreground)]';
+        narratorBox.className = 'relative bg-blue-500/10 border border-blue-500/30 rounded-xl p-3.5 flex items-start gap-3 transition-all-300';
+        narratorIcon.className = 'p-1.5 rounded-lg bg-blue-500/20 text-blue-500 shrink-0 mt-0.5';
+        narratorTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-blue-500';
+        narratorText.textContent = 'Click "Play" or "Next Step" to trace the two-pointer splice in O(n + m) time.';
+      } else {
+        comparisonDetail.textContent = step.comp;
+
+        if (step.pick === 'list1') {
+          decisionBadge.textContent = 'SPLICED LIST 1';
+          decisionBadge.className = 'text-xs font-mono px-3 py-1 rounded-full bg-blue-500/20 text-blue-500 border border-blue-500/40 font-bold';
+        } else if (step.pick === 'list2') {
+          decisionBadge.textContent = 'SPLICED LIST 2';
+          decisionBadge.className = 'text-xs font-mono px-3 py-1 rounded-full bg-purple-500/20 text-purple-500 border border-purple-500/40 font-bold';
+        } else if (step.pick.startsWith('splice')) {
+          decisionBadge.textContent = 'O(1) TAIL ATTACH';
+          decisionBadge.className = 'text-xs font-mono px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/40 font-bold';
+        } else {
+          decisionBadge.textContent = 'COMPLETE';
+          decisionBadge.className = 'text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 font-bold';
+        }
+
+        if (isDone) {
+          narratorBox.className = 'relative bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3.5 flex items-start gap-3 transition-all-300';
+          narratorIcon.className = 'p-1.5 rounded-lg bg-emerald-500/20 text-emerald-500 shrink-0 mt-0.5';
+          narratorTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-emerald-500';
+        } else {
+          narratorBox.className = 'relative bg-blue-500/10 border border-blue-500/30 rounded-xl p-3.5 flex items-start gap-3 transition-all-300';
+          narratorIcon.className = 'p-1.5 rounded-lg bg-blue-500/20 text-blue-500 shrink-0 mt-0.5';
+          narratorTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-blue-500';
+        }
+        narratorText.textContent = step.narrator;
+      }
+    }
+
+    function stepForward() {
+      const tc = testCases[currentCaseIdx];
+      if (stepIndex < tc.steps.length - 1) {
+        stepIndex++;
+        renderState();
+        if (stepIndex === tc.steps.length - 1) {
+          stopAutoPlay();
+        }
+      } else {
+        stopAutoPlay();
+      }
+    }
+
+    function stepBackward() {
+      if (stepIndex > 0) {
+        stepIndex--;
+        renderState();
+      } else if (stepIndex === 0) {
+        stepIndex = -1;
+        renderState();
+      }
+      stopAutoPlay();
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function startAutoPlay() {
+      const tc = testCases[currentCaseIdx];
+      if (stepIndex >= tc.steps.length - 1) {
+        stepIndex = -1;
+        renderState();
+      }
+      isPlaying = true;
+      playText.textContent = "Pause";
+      playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      timer = setInterval(() => {
+        stepForward();
+      }, playSpeed);
+    }
+
+    function stopAutoPlay() {
+      isPlaying = false;
+      playText.textContent = "Play";
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    // Event listeners
+    caseSelect.addEventListener('change', (e) => loadCase(Number(e.target.value)));
+    btnNext.addEventListener('click', () => { stopAutoPlay(); stepForward(); });
+    btnPrev.addEventListener('click', () => { stopAutoPlay(); stepBackward(); });
+    btnReset.addEventListener('click', () => { stopAutoPlay(); stepIndex = -1; renderState(); });
+    btnPlay.addEventListener('click', togglePlay);
+
+    speedButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        speedButtons.forEach(b => {
+          b.className = 'speed-btn px-2 py-0.5 rounded font-mono font-medium hover:bg-[var(--card)]';
+        });
+        btn.className = 'speed-btn px-2 py-0.5 rounded font-mono font-bold bg-blue-600 text-white';
+        playSpeed = Number(btn.getAttribute('data-speed'));
+        if (isPlaying) {
+          stopAutoPlay();
+          startAutoPlay();
+        }
+      });
+    });
+
+    loadCase(0);
+  </script>
+</body>
+</html>
